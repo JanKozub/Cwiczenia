@@ -1,5 +1,7 @@
 package DidUMean;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.IntStream;
@@ -38,10 +40,10 @@ there is always exactly one possible correct solution
 public class Dictionary {
 
     public static String randomString(int max) {
-        int len = (int)(1 + Math.random() * max);
+        int len = (int) (1 + Math.random() * max);
         char[] c = new char[len];
-        for(int i = 0; i < len; i++) {
-            c[i] = (char)('a' + (int)(Math.random() * 26));
+        for (int i = 0; i < len; i++) {
+            c[i] = (char) ('a' + (int) (Math.random() * 26));
         }
         return new String(c);
     }
@@ -75,7 +77,7 @@ public class Dictionary {
         String output = "";
         int bestDiff = Integer.MAX_VALUE;
         for (String word : sortedWords) {
-            if(Math.abs(to.length() - word.length()) > bestDiff)
+            if (Math.abs(to.length() - word.length()) > bestDiff)
                 continue;
 
             int wordDiff = getNumberOfDiff(to, word, bestDiff);
@@ -110,21 +112,21 @@ public class Dictionary {
         if (source.charAt(sourceIdx) == target.charAt(targetIdx)) {
             return lev(source, sourceIdx + 1, target, targetIdx + 1, maxDiffs);
         } else {
-            if(maxDiffs == 0) {
-                return Integer.MAX_VALUE;
+            if (maxDiffs == 0) {
+                return Integer.MAX_VALUE / 2;
             }
 
-            int costAfterDelete = lev(source, sourceIdx + 1, target, targetIdx, maxDiffs--);
-            if (costAfterDelete == 0)
+            int minCost = lev(source, sourceIdx + 1, target, targetIdx, maxDiffs - 1);
+            if (minCost == 0)
                 return 1;
 
-            int costAfterInsert = lev(source, sourceIdx, target, targetIdx + 1, maxDiffs--);
-            if (costAfterInsert == 0)
+            minCost = Math.min(minCost, lev(source, sourceIdx, target, targetIdx + 1, Math.min(minCost, maxDiffs - 1)));
+            if (minCost == 0)
                 return 1;
 
-            int costAfterReplace = lev(source, sourceIdx + 1, target, targetIdx + 1, maxDiffs--);
+            minCost = Math.min(minCost, lev(source, sourceIdx + 1, target, targetIdx + 1, Math.min(minCost, maxDiffs - 1)));
 
-            return 1 + Math.min(Math.min(costAfterDelete, costAfterInsert), costAfterReplace);
+            return 1 + minCost;
         }
     }
 }
