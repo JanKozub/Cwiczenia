@@ -1,4 +1,4 @@
-package phoneDir;
+package katas.phoneDir;
 
 /*
 John keeps a backup of his old personal phone book as a text file. On each line of the file he can find the phone number (formated as +X-abc-def-ghij where X stands for one or

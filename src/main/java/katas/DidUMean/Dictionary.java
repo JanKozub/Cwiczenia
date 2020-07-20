@@ -1,6 +1,4 @@
-package DidUMean;
-
-import org.apache.commons.lang3.StringUtils;
+package katas.DidUMean;
 
 import java.util.Arrays;
 import java.util.Comparator;
