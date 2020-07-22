@@ -10,26 +10,18 @@ public class Mazev2 {
     private static int mazeLength = 0;
     private static int mazeHeight = 0;
     private static char player = ' ';
+    private static int[] playerPos;
 
     private static int wall = -2;
     private static int field = -1;
 
     public static void main(String[] args) {
-
+//
 //        char[][] array = new char[][]{
-//                "#####".toCharArray(),
-//                "#># #".toCharArray(),
-//                "#   #".toCharArray(),
-//                "# # #".toCharArray(),
-//                "### #".toCharArray()
+//                "# #".toCharArray(),
+//                " > ".toCharArray(),
+//                "# #".toCharArray()
 //        };
-        /*
-                "#####".toCharArray(),
-                "#>#4#".toCharArray(),
-                "#123#".toCharArray(),
-                "#2#4#".toCharArray(),
-                "###5#".toCharArray()
-         */
 
 //        char[][] array = new char[][]{
 //                "###########".toCharArray(),
@@ -38,38 +30,51 @@ public class Mazev2 {
 //        };
 
 //        char[][] array = new char[][] {
-//                "##########".toCharArray(),
-//                "#        #".toCharArray(),
-//                "#  ##### #".toCharArray(),
-//                "#  #   # #".toCharArray(),
-//                "#  #^# # #".toCharArray(),
-//                "#  ### # #".toCharArray(),
-//                "#      # #".toCharArray(),
-//                "######## #".toCharArray()
+//                "# #########".toCharArray(),
+//                "#        >#".toCharArray(),
+//                "###########".toCharArray()
 //        };
+//
+//        char[][] array = new char[][] {
+//                "####### #".toCharArray(),
+//                "#>#   # #".toCharArray(),
+//                "#   #   #".toCharArray(),
+//                "#########".toCharArray()
+//        };
+//
         char[][] array = new char[][] {
-                "#########################################".toCharArray(),
-                "#<    #       #     #         # #   #   #".toCharArray(),
-                "##### # ##### # ### # # ##### # # # ### #".toCharArray(),
-                "# #   #   #   #   #   # #     #   #   # #".toCharArray(),
-                "# # # ### # ########### # ####### # # # #".toCharArray(),
-                "#   #   # # #       #   # #   #   # #   #".toCharArray(),
-                "####### # # # ##### # ### # # # #########".toCharArray(),
-                "#   #     # #     # #   #   # # #       #".toCharArray(),
-                "# # ####### ### ### ##### ### # ####### #".toCharArray(),
-                "# #             #   #     #   #   #   # #".toCharArray(),
-                "# ############### ### ##### ##### # # # #".toCharArray(),
-                "#               #     #   #   #   # #   #".toCharArray(),
-                "##### ####### # ######### # # # ### #####".toCharArray(),
-                "#   # #   #   # #         # # # #       #".toCharArray(),
-                "# # # # # # ### # # ####### # # ### ### #".toCharArray(),
-                "# # #   # # #     #   #     # #     #   #".toCharArray(),
-                "# # ##### # # ####### # ##### ####### # #".toCharArray(),
-                "# #     # # # #   # # #     # #       # #".toCharArray(),
-                "# ##### ### # ### # # ##### # # ### ### #".toCharArray(),
-                "#     #     #     #   #     #   #   #    ".toCharArray(),
-                "#########################################".toCharArray()
+                "##########".toCharArray(),
+                "#        #".toCharArray(),
+                "#  ##### #".toCharArray(),
+                "#  #   # #".toCharArray(),
+                "#  #^# # #".toCharArray(),
+                "#  ### # #".toCharArray(),
+                "#      # #".toCharArray(),
+                "######## #".toCharArray()
         };
+//        char[][] array = new char[][]{
+//                "#########################################".toCharArray(),
+//                "#<    #       #     #         # #   #   #".toCharArray(),
+//                "##### # ##### # ### # # ##### # # # ### #".toCharArray(),
+//                "# #   #   #   #   #   # #     #   #   # #".toCharArray(),
+//                "# # # ### # ########### # ####### # # # #".toCharArray(),
+//                "#   #   # # #       #   # #   #   # #   #".toCharArray(),
+//                "####### # # # ##### # ### # # # #########".toCharArray(),
+//                "#   #     # #     # #   #   # # #       #".toCharArray(),
+//                "# # ####### ### ### ##### ### # ####### #".toCharArray(),
+//                "# #             #   #     #   #   #   # #".toCharArray(),
+//                "# ############### ### ##### ##### # # # #".toCharArray(),
+//                "#               #     #   #   #   # #   #".toCharArray(),
+//                "##### ####### # ######### # # # ### #####".toCharArray(),
+//                "#   # #   #   # #         # # # #       #".toCharArray(),
+//                "# # # # # # ### # # ####### # # ### ### #".toCharArray(),
+//                "# # #   # # #     #   #     # #     #   #".toCharArray(),
+//                "# # ##### # # ####### # ##### ####### # #".toCharArray(),
+//                "# #     # # # #   # # #     # #       # #".toCharArray(),
+//                "# ##### ### # ### # # ##### # # ### ### #".toCharArray(),
+//                "#     #     #     #   #     #   #   #    ".toCharArray(),
+//                "#########################################".toCharArray()
+//        };
 
         System.out.println(escape(array));
     }
@@ -82,14 +87,17 @@ public class Mazev2 {
 
         int[] exit = getExitField(maze);
 
-        if (exit == null)
+        if (exit == null) {
             return result;
+        }
+
+        System.out.println(maze[exit[0]][exit[1]]);
 
         int[][] numericalMaze = translateCharsToNumbers(maze);
 
         printMaze(numericalMaze);
 
-        markNextSteps(numericalMaze);
+        markNextSteps(numericalMaze, playerPos[0], playerPos[1]);
 
         printMaze(numericalMaze);
 
@@ -131,6 +139,7 @@ public class Mazev2 {
                         break;
                     default:
                         player = maze[ver][hor];
+                        playerPos = new int[]{ver, hor};
                         result[ver][hor] = 0;
                 }
             }
@@ -138,23 +147,22 @@ public class Mazev2 {
         return result;
     }
 
-    private static void markNextSteps(int[][] maze) {
-        for (int ver = 0; ver < mazeHeight; ver++) {
-            for (int hor = 0; hor < mazeLength; hor++) {
-                if (maze[ver][hor] >= 0) {
-                    if (ver > 0 && maze[ver - 1][hor] == field)
-                        maze[ver - 1][hor] = maze[ver][hor] + 1;
-
-                    if (ver < (mazeHeight - 1) && maze[ver + 1][hor] == field)
-                        maze[ver + 1][hor] = maze[ver][hor] + 1;
-
-                    if (hor > 0 && maze[ver][hor - 1] == field)
-                        maze[ver][hor - 1] = maze[ver][hor] + 1;
-
-                    if (hor < (mazeLength - 1) && maze[ver][hor + 1] == field)
-                        maze[ver][hor + 1] = maze[ver][hor] + 1;
-                }
-            }
+    private static void markNextSteps(int[][] maze, int ver, int hor) {
+        if (ver > 0 && maze[ver - 1][hor] == field) {
+            maze[ver - 1][hor] = maze[ver][hor] + 1;
+            markNextSteps(maze, ver - 1, hor);
+        }
+        if (ver < (mazeHeight - 1) && maze[ver + 1][hor] == field) {
+            maze[ver + 1][hor] = maze[ver][hor] + 1;
+            markNextSteps(maze, ver + 1, hor);
+        }
+        if (hor > 0 && maze[ver][hor - 1] == field) {
+            maze[ver][hor - 1] = maze[ver][hor] + 1;
+            markNextSteps(maze, ver, hor - 1);
+        }
+        if (hor < (mazeLength - 1) && maze[ver][hor + 1] == field) {
+            maze[ver][hor + 1] = maze[ver][hor] + 1;
+            markNextSteps(maze, ver, hor + 1);
         }
     }
 
@@ -164,9 +172,16 @@ public class Mazev2 {
         int currentVal;
         do {
             currentVal = maze[exit[0]][exit[1]];
-            if (currentVal == 1) {
-                lastMove = new int[]{exit[0], exit[1]};
+
+            if (currentVal == 15) {
+                System.out.println("debug");
             }
+            if (currentVal == -1)
+                return result;
+
+            if (currentVal == 1)
+                lastMove = new int[]{exit[0], exit[1]};
+
 
             if (exit[0] > 0)
                 if (maze[exit[0] - 1][exit[1]] + 1 == currentVal) {
@@ -206,9 +221,13 @@ public class Mazev2 {
 
             if (exit[1] > 0)
                 if (maze[exit[0]][exit[1] - 1] + 1 == currentVal) {
-                    if (maze[exit[0]][exit[1] + 1] != currentVal + 1) {
-                        result.add('R');
-                    }
+                    if (exit[1] < mazeLength - 1)
+                        if (maze[exit[0]][exit[1] + 1] != currentVal + 1) {
+                            if (maze[exit[0] + 1][exit[1]] - 1 == currentVal)
+                                result.add('R');
+                            else if (maze[exit[0] - 1][exit[1]] - 1 == currentVal)
+                                result.add('L');
+                        }
                     result.add('F');
 
                     exit[1] = exit[1] - 1;
@@ -218,7 +237,10 @@ public class Mazev2 {
             if (exit[1] < mazeLength - 1)
                 if (maze[exit[0]][exit[1] + 1] + 1 == currentVal) {
                     if (maze[exit[0]][exit[1] - 1] != currentVal + 1) {
-                        result.add('L');
+                        if (maze[exit[0] + 1][exit[1]] - 1 == currentVal)
+                            result.add('L');
+                        else if (maze[exit[0] - 1][exit[1]] - 1 == currentVal)
+                            result.add('R');
                     }
                     result.add('F');
 
@@ -251,9 +273,9 @@ public class Mazev2 {
         else if (pointingField[0] == lastMove[0] && pointingField[1] != lastMove[1])
             result.add(0, 'B');
         else if (pointingField[0] < lastMove[0] && pointingField[1] > lastMove[1])
-            result.add(0, 'L');
-        else if (pointingField[0] > lastMove[0] && pointingField[1] < lastMove[1])
             result.add(0, 'R');
+        else if (pointingField[0] > lastMove[0] && pointingField[1] < lastMove[1])
+            result.add(0, 'L');
         else if (pointingField[0] < lastMove[0] && pointingField[1] < lastMove[1])
             result.add(0, 'R');
         else if (pointingField[0] > lastMove[0] && pointingField[1] > lastMove[1])
