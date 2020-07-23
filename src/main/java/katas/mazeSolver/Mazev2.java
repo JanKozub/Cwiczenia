@@ -14,6 +14,7 @@ public class Mazev2 {
 
     private static int wall = -2;
     private static int field = -1;
+    private static int startField = 0;
 
     public static void main(String[] args) {
 //
@@ -52,6 +53,7 @@ public class Mazev2 {
                 "#      # #".toCharArray(),
                 "######## #".toCharArray()
         };
+
 //        char[][] array = new char[][]{
 //                "#########################################".toCharArray(),
 //                "#<    #       #     #         # #   #   #".toCharArray(),
@@ -93,15 +95,15 @@ public class Mazev2 {
 
         System.out.println(maze[exit[0]][exit[1]]);
 
-        int[][] numericalMaze = translateCharsToNumbers(maze);
+        Field[][] convertedMaze = ConvertCharsToFields(maze);
 
-        printMaze(numericalMaze);
+        printMaze(convertedMaze);
 
-        markNextSteps(numericalMaze, playerPos[0], playerPos[1]);
+        markFields(convertedMaze, playerPos[0], playerPos[1]);
 
-        printMaze(numericalMaze);
+        printMaze(convertedMaze);
 
-        result = solveMaze(numericalMaze, exit);
+        result = solveMaze(convertedMaze, exit);
 
         return result;
     }
@@ -125,57 +127,67 @@ public class Mazev2 {
         return null;
     }
 
-    private static int[][] translateCharsToNumbers(char[][] maze) {
-        int[][] result = new int[mazeHeight][mazeLength];
+    private static Field[][] ConvertCharsToFields(char[][] maze) {
+        Field[][] convertedArray = new Field[mazeHeight][mazeLength];
 
         for (int ver = 0; ver < mazeHeight; ver++) {
             for (int hor = 0; hor < mazeLength; hor++) {
                 switch (maze[ver][hor]) {
                     case '#':
-                        result[ver][hor] = wall;
+                        convertedArray[ver][hor] = new Field(wall, new int[]{ver, hor});
                         break;
                     case ' ':
-                        result[ver][hor] = field;
+                        convertedArray[ver][hor] = new Field(field, new int[]{ver, hor});
                         break;
                     default:
                         player = maze[ver][hor];
                         playerPos = new int[]{ver, hor};
-                        result[ver][hor] = 0;
+                        convertedArray[ver][hor] = new Field(startField, new int[]{ver, hor});
                 }
             }
         }
-        return result;
+        return convertedArray;
     }
 
-    private static void markNextSteps(int[][] maze, int ver, int hor) {
-        if (ver > 0 && maze[ver - 1][hor] == field) {
-            maze[ver - 1][hor] = maze[ver][hor] + 1;
-            markNextSteps(maze, ver - 1, hor);
+    private static void markFields(Field[][] maze, int ver, int hor) {
+        if (ver > 0 && maze[ver - 1][hor].getType() == field) {
+            maze[ver - 1][hor].setType(maze[ver][hor].getType() + 1);
+            maze[ver - 1][hor].setPrevField(new int[]{ver, hor});
+
+            markFields(maze, ver - 1, hor);
         }
-        if (ver < (mazeHeight - 1) && maze[ver + 1][hor] == field) {
-            maze[ver + 1][hor] = maze[ver][hor] + 1;
-            markNextSteps(maze, ver + 1, hor);
+        if (ver < (mazeHeight - 1) && maze[ver + 1][hor].getType() == field) {
+            maze[ver + 1][hor].setType(maze[ver][hor].getType() + 1);
+            maze[ver + 1][hor].setPrevField(new int[]{ver, hor});
+
+            markFields(maze, ver + 1, hor);
         }
-        if (hor > 0 && maze[ver][hor - 1] == field) {
-            maze[ver][hor - 1] = maze[ver][hor] + 1;
-            markNextSteps(maze, ver, hor - 1);
+        if (hor > 0 && maze[ver][hor - 1].getType() == field) {
+            maze[ver][hor - 1].setType(maze[ver][hor].getType() + 1);
+            maze[ver][hor - 1].setPrevField(new int[]{ver, hor});
+
+            markFields(maze, ver, hor - 1);
         }
-        if (hor < (mazeLength - 1) && maze[ver][hor + 1] == field) {
-            maze[ver][hor + 1] = maze[ver][hor] + 1;
-            markNextSteps(maze, ver, hor + 1);
+        if (hor < (mazeLength - 1) && maze[ver][hor + 1].getType() == field) {
+            maze[ver][hor + 1].setType(maze[ver][hor].getType() + 1);
+            maze[ver][hor + 1].setPrevField(new int[]{ver, hor});
+
+            markFields(maze, ver, hor + 1);
         }
     }
 
-    private static List<Character> solveMaze(int[][] maze, int[] exit) {
+    private static List<Character> solveMaze(Field[][] maze, int[] exit) {
         List<Character> result = new ArrayList<>();
         int[] lastMove = new int[0];
         int currentVal;
         do {
-            currentVal = maze[exit[0]][exit[1]];
+            Field field = maze[exit[0]][exit[1]];
+            currentVal = field.getType();
 
             if (currentVal == 15) {
-                System.out.println("debug");
+                System.out.println("test");
             }
+
             if (currentVal == -1)
                 return result;
 
@@ -184,15 +196,15 @@ public class Mazev2 {
 
 
             if (exit[0] > 0)
-                if (maze[exit[0] - 1][exit[1]] + 1 == currentVal) {
+                if (exit[0] - 1 == field.getPrevField()[0]) {
 
                     if (exit[1] < mazeLength - 1)
-                        if (maze[exit[0]][exit[1] + 1] == currentVal + 1) {
+                        if (maze[exit[0]][exit[1] + 1].getType() == currentVal + 1) {
                             result.add('L');
                         }
 
                     if (exit[1] > 0)
-                        if (maze[exit[0]][exit[1] - 1] == currentVal + 1) {
+                        if (maze[exit[0]][exit[1] - 1].getType() == currentVal + 1) {
                             result.add('R');
                         }
 
@@ -202,15 +214,15 @@ public class Mazev2 {
                 }
 
             if (exit[0] < mazeHeight - 1)
-                if (maze[exit[0] + 1][exit[1]] + 1 == currentVal) {
+                if (exit[0] + 1 == field.getPrevField()[0]) {
 
                     if (exit[1] < mazeLength - 1)
-                        if (maze[exit[0]][exit[1] + 1] == currentVal + 1) {
+                        if (maze[exit[0]][exit[1] + 1].getType() == currentVal + 1) {
                             result.add('R');
                         }
 
                     if (exit[1] > 0)
-                        if (maze[exit[0]][exit[1] - 1] == currentVal + 1) {
+                        if (maze[exit[0]][exit[1] - 1].getType() == currentVal + 1) {
                             result.add('L');
                         }
 
@@ -220,12 +232,12 @@ public class Mazev2 {
                 }
 
             if (exit[1] > 0)
-                if (maze[exit[0]][exit[1] - 1] + 1 == currentVal) {
+                if (exit[1] - 1 == field.getPrevField()[1]) {
                     if (exit[1] < mazeLength - 1)
-                        if (maze[exit[0]][exit[1] + 1] != currentVal + 1) {
-                            if (maze[exit[0] + 1][exit[1]] - 1 == currentVal)
+                        if (maze[exit[0]][exit[1] + 1].getType() != currentVal + 1) {
+                            if (maze[exit[0] + 1][exit[1]].getType() - 1 == currentVal)
                                 result.add('R');
-                            else if (maze[exit[0] - 1][exit[1]] - 1 == currentVal)
+                            else if (maze[exit[0] - 1][exit[1]].getType() - 1 == currentVal)
                                 result.add('L');
                         }
                     result.add('F');
@@ -235,11 +247,11 @@ public class Mazev2 {
                 }
 
             if (exit[1] < mazeLength - 1)
-                if (maze[exit[0]][exit[1] + 1] + 1 == currentVal) {
-                    if (maze[exit[0]][exit[1] - 1] != currentVal + 1) {
-                        if (maze[exit[0] + 1][exit[1]] - 1 == currentVal)
+                if (exit[1] + 1 == field.getPrevField()[1]) {
+                    if (maze[exit[0]][exit[1] - 1].getType() != currentVal + 1) {
+                        if (maze[exit[0] + 1][exit[1]].getType() - 1 == currentVal)
                             result.add('L');
-                        else if (maze[exit[0] - 1][exit[1]] - 1 == currentVal)
+                        else if (maze[exit[0] - 1][exit[1]].getType() - 1 == currentVal)
                             result.add('R');
                     }
                     result.add('F');
@@ -284,11 +296,41 @@ public class Mazev2 {
         return result;
     }
 
-    private static void printMaze(int[][] maze) {
-        for (int[] ver : maze) {
+    private static void printMaze(Field[][] maze) {
+        for (Field[] ver : maze) {
             System.out.println(Arrays.toString(ver));
         }
         System.out.println("--------------------------------");
     }
 
+    private static class Field {
+        private int type;
+        private int[] prevField;
+
+        public Field(int type, int[] prevField) {
+            this.type = type;
+            this.prevField = prevField;
+        }
+
+        public int getType() {
+            return type;
+        }
+
+        public void setType(int type) {
+            this.type = type;
+        }
+
+        public int[] getPrevField() {
+            return prevField;
+        }
+
+        public void setPrevField(int[] prevField) {
+            this.prevField = prevField;
+        }
+
+        @Override
+        public String toString() {
+            return "" + type;
+        }
+    }
 }
