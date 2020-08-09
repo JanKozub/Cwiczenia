@@ -21,6 +21,7 @@ public class BattleField {
 
     private static final int FIELD_HEIGHT = 10;
     private static final int FIELD_LENGTH = 10;
+
     private static int[][] battleField = {
             {0, 0, 1, 1, 1, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
